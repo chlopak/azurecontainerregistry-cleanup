@@ -50,11 +50,12 @@ for($index=2; $index -lt $RepoList.length; $index++){
     write-host ""
     Write-Host "Checking repository: $RepositoryName"
     $RepositoryTags = az acr repository show-tags --name $AzureRegistryName --repository $RepositoryName --output tsv --orderby time_desc
-    write-host "# Total images:"$RepositoryTags.length" # Images to keep:"$ImagestoKeep
-
-    if ($RepositoryTags.length -gt $ImagestoKeep) {
+    $RepositoryTagLines = [int]($RepositoryTags | Measure-Object -Line |Select-Object -Property Lines -ExpandProperty Lines)
+    write-host "# Total images:"$RepositoryTagLines" # Images to keep:"$ImagestoKeep
+    
+    if ($RepositoryTagLines -gt $ImagestoKeep) {
         write-host "Deleting surplus images..."
-        for ($item=$ImagestoKeep; $item -lt $RepositoryTags.length; $item++) {
+        for ($item=$ImagestoKeep; $item -lt $RepositoryTagLines; $item++) {
             $ImageName = $RepositoryName + ":" + $RepositoryTags[$item]
             $imagesDeleted++
             if ($EnableDelete -eq "yes") {
